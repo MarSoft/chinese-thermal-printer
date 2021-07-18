@@ -398,26 +398,6 @@ async def main():
     #await proto.do_feed_paper(0x30)
     await proto.lattice_end()
 
-
-    # just wait indefinitely
-    while False:
-        try:
-            s = input()
-        except EOFError:
-            break
-        if not s.strip():
-            await asyncio.sleep(1)
-            continue
-        cmd, *args = s.split()
-        if not hasattr(proto, cmd):
-            print('Unknown')
-            continue
-        if cmd == 'cmd':
-            args[0] = int(args[0], 0)
-            args[1] = bytes.fromhex(' '.join(args[1:]))
-            args = args[:2]
-        print(await getattr(proto, cmd)(*args))
-
     await proto.disconnect()
 
 if __name__ == '__main__':
