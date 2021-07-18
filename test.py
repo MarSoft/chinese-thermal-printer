@@ -214,6 +214,10 @@ class Protocol:
         # expected values: 2, 3, 5
         await self.cmd(0xa4, bytes([0x20 + speed]))
 
+    async def set_energy(self, value: int):
+        assert 0 <= value <= 0xffff
+        await self.cmd(0xaf, struct.pack('<H', value))
+
     async def set_wifi_date(self, a, b):
         data = b'\x00\xa0' + a.encode() + b.encode()
         resp = await self.cmd(0xa5, data, with_resp=True)
@@ -246,7 +250,15 @@ class Protocol:
         await self.cmd(0xbe, b'\x01')
 
     async def feed_paper(self, amount):
+        # IDK what it does, but it does not feed paper
         await self.cmd(0xbd, bytes([amount]))
+
+    async def do_feed_paper(self, amount):
+        """
+        Do feed paper. Amount is from 0 to 0xffff,
+        actual values are 0x30 and 0x48.
+        """
+        await self.cmd(0xa1, struct.pack('<H', amount))
 
     async def send_raw(self, data):
         if isinstance(data, str):
@@ -370,19 +382,20 @@ async def main():
     lines = convert(img, 384)
 
     await asyncio.sleep(1)
-    await proto.set_quality(3)
-    #await proto.lattice_start()
-    await proto.cmd(0xaf, b'\x2e\x89')
+
+    await proto.set_quality(3)  # IDK what does it mean in reality
+    await proto.lattice_start()
+    await proto.set_energy(0)  # 0 to 0xffff; bigger value means darger print
     await proto.print_text()
     await proto.feed_paper(26)
     for line in lines:
         await proto.print_line(line)  #[:384])
     await proto.feed_paper(25)
-    await proto.cmd(0xa1, bytes([0x30, 0]))
-    await proto.cmd(0xa1, bytes([0x30, 0]))
+    await proto.do_feed_paper(0x30)
+    await proto.do_feed_paper(0x30)
     await proto.get_dev_state()
-    await proto.feed_paper(25)
-    await proto.cmd(0xa1, bytes([0x30, 0]))
+    #await proto.feed_paper(25)
+    #await proto.do_feed_paper(0x30)
     await proto.lattice_end()
 
 
