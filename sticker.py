@@ -25,19 +25,26 @@ def render(text: str) -> Image.Image:
 
     # start by full height then fit by width
     lineheight = height // len(lines)
+    textheight = height
+    widths = []
     while True:
         draw.font = ImageFont.truetype('font.ttf', lineheight)
-        maxwidth = 0
+        textheight = 0
+        widths.clear()
         for line in lines:
             x, y, w, h =draw.font.getbbox(line)
-            if w > maxwidth:
-                maxwidth = w
-        if maxwidth <= width:
+            # use lineheight (nominal), not h (actual)
+            textheight += lineheight+y
+            widths.append(w)
+        if max(widths) <= width:
             break
         lineheight -= 1
 
+    offset = max(0, (height - textheight)//2)
+
     for i, line in enumerate(lines):
-        draw.text((0, i*lineheight), line)
+        xoffset = (width - widths[i])//2
+        draw.text((xoffset, offset+i*lineheight), line)
 
     return img
 
@@ -57,10 +64,11 @@ async def main():
     await prn.get_dev_info()
     print(await prn.get_dev_state())
 
-    await prn.set_energy(0)  # 0 to 0xffff
+    await prn.set_energy(0x1000)  # 0 to 0xffff
     await prn.print_text()
     await prn.print_lines(lines)
-    await prn.do_feed_paper(40)
+    await prn.do_feed_paper(80)
+    await prn.disconnect()
 
 
 
