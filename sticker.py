@@ -67,7 +67,7 @@ async def main():
     await prn.get_dev_info()
     print(await prn.get_dev_state())
 
-    await prn.set_energy(0x1000)  # 0 to 0xffff
+    await prn.set_energy(0x8000)  # 0 to 0xffff
     await prn.print_text()
     await prn.print_lines(lines)
     await prn.do_feed_paper(80)
