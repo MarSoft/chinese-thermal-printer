@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# Usage:
+# cat label.txt | python sticker.py [-p]
+# -p means "preview and do not print"
 
 import asyncio
 import sys
