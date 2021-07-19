@@ -2,7 +2,7 @@ Alternative App for Cheap Chinese Thermal Printer
 =================================================
 
 Recently I bought a cat-shaped cheap chinese thermal printer similar to this one:
-![Printer photo](https://i.bosity.com/product_img/273/68033039/68033039_10_image.jpg)
+![Printer photo](docs/printer-sample.jpg)
 
 According to the manual, it works with Android/iOS app named `iPrint`, and it actually works.
 But other Android apps I checked do not work with it, and the `iPrint` app is awfully unusable IMO.
