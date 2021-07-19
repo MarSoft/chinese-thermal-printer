@@ -10,7 +10,6 @@ from bleak import BleakScanner
 from PIL import Image
 
 
-address = '8D:BA:D7:22:D8:7B'
 uuid_tpl = '0000%s-0000-1000-8000-00805f9b34fb'
 service = uuid_tpl % 'ae30'
 char_w = uuid_tpl % 'ae01'
@@ -112,11 +111,10 @@ class Protocol:
         print('Connected')
 
     async def disconnect(self):
+        # put a "stop loop" marker (None) to the queue
         self.bt.stop_loop()
         # wait for all packets to be sent
-        while not self.bt._send_queue.empty():
-            # .join won't work since we don't use task_done()
-            await asyncio.sleep(.3)
+        await self.flush()
         await self.bt.disconnect()
         # do something with self.task? or will it close itself?
         if e := self.task.exception():
@@ -174,6 +172,10 @@ class Protocol:
             if p.code == code:
                 return p
             print('Dropping unexpected packet', p, hex(code))
+
+    async def flush(self):
+        while not self.bt._send_queue.empty():
+            await asyncio.sleep(.3)
 
     async def get_dev_info(self):
         res = await self.cmd(0xa8, with_resp=True)
@@ -321,6 +323,10 @@ class Protocol:
             code = 0xa2  # packed, i.e. non-compressed
         await self.cmd(code, data)
 
+    async def print_lines(self, lines: List[List[int]]):
+        for line in lines:
+            await self.print_line(line)
+
 
 async def find_printers():
     print('Scanning')
@@ -357,6 +363,9 @@ def convert(img, width=384):
 
 
 async def main():
+    """
+    Just a simple implementation which loads an image, converts and prints it
+    """
     args = lambda: None
     args.verbose = True
     setup_logger(args)
