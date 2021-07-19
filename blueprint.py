@@ -94,6 +94,8 @@ class DeviceState(enum.Flag):
 
 class Protocol:
     def __init__(self, addr):
+        if hasattr(addr, 'address'):
+            addr = addr.address
         self.addr = addr
         self.read_queue = asyncio.Queue()
         self.bt = BLE_interface()
@@ -362,14 +364,7 @@ def convert(img, width=384):
     return lines
 
 
-async def main():
-    """
-    Just a simple implementation which loads an image, converts and prints it
-    """
-    args = lambda: None
-    args.verbose = True
-    setup_logger(args)
-
+async def get_printer():
     printers = await find_printers()
     if not printers:
         print('No printers found')
@@ -378,9 +373,20 @@ async def main():
         print('Choose printer... (not implemented)', printers)
         return 1
     print('Using printer', printers[0])
-    addr = printers[0].address
+    return printers[0]
 
-    proto = Protocol(addr)
+
+async def main():
+    """
+    Just a simple implementation which loads an image, converts and prints it
+    """
+    args = lambda: None
+    args.verbose = True
+    setup_logger(args)
+
+    printer = await get_printer()
+
+    proto = Protocol(printer.address)
     await proto.connect()
     await asyncio.sleep(1)
 
@@ -397,8 +403,9 @@ async def main():
     await proto.set_energy(0)  # 0 to 0xffff; bigger value means darger print
     await proto.print_text()
     await proto.feed_paper(26)
-    for line in lines:
-        await proto.print_line(line)  #[:384])
+
+    await proto.print_lines(lines)  #[:384])
+
     await proto.feed_paper(25)
     await proto.do_feed_paper(0x30)
     await proto.do_feed_paper(0x30)
