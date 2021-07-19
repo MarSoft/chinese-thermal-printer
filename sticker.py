@@ -18,7 +18,7 @@ def render(text: str) -> Image.Image:
     draw = ImageDraw.Draw(img)
     draw.fill = black
 
-    lines = text.strip().splitlines()
+    lines = text.splitlines()
     if not lines:
         # nothing to render, return empty image
         return img
