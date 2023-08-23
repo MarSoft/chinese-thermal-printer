@@ -1,0 +1,2 @@
+pillow
+ble_serial
