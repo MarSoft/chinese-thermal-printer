@@ -367,11 +367,9 @@ def convert(img, width=384):
 async def get_printer():
     printers = await find_printers()
     if not printers:
-        print('No printers found')
-        return 1
+        raise ValueError('No printers found')
     if len(printers) > 1:
-        print('Choose printer... (not implemented)', printers)
-        return 1
+        raise ValueError(f'Choose printer... (not implemented)\n{printers}')
     print('Using printer', printers[0])
     return printers[0]
 
